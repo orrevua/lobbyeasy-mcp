@@ -80,7 +80,7 @@ class InMemoryAuditSink:
 
     async def record(self, entry: AuditEntry) -> None:
         self.entries.append(entry)
-        log.info("audit %s", json.dumps(asdict(entry), default=str))
+        log.debug("audit %s", json.dumps(asdict(entry), default=str))
 
 
 class PostgresAuditSink:

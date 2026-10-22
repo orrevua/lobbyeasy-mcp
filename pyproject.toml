@@ -3,6 +3,21 @@ name = "lobbyeasy-mcp"
 version = "0.1.0"
 description = "Model Context Protocol server for LobbyEasy, a building lobby package manager"
 readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+keywords = ["mcp", "model-context-protocol", "llm", "agents", "supabase", "postgres", "condominium"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "Framework :: AsyncIO",
+    "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Typing :: Typed",
+]
 authors = [
     { name = "orrevua", email = "felipevictor67@gmail.com" }
 ]
@@ -14,6 +29,12 @@ dependencies = [
     "pydantic>=2.8",
     "pydantic-settings>=2.4",
 ]
+
+[project.urls]
+Homepage = "https://github.com/orrevua/lobbyeasy-mcp"
+Documentation = "https://github.com/orrevua/lobbyeasy-mcp#readme"
+Issues = "https://github.com/orrevua/lobbyeasy-mcp/issues"
+Blog = "https://orrevua.dev"
 
 [project.scripts]
 lobbyeasy-mcp = "lobbyeasy_mcp.cli:main"

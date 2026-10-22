@@ -1,0 +1,26 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-09-29/server.schema.json",
+  "name": "io.github.orrevua/lobbyeasy-mcp",
+  "title": "LobbyEasy",
+  "description": "Query and (with confirmation) update a building lobby's package log: pending packages, residents with masked PII, daily stats.",
+  "version": "0.1.0",
+  "repository": {
+    "url": "https://github.com/orrevua/lobbyeasy-mcp",
+    "source": "github"
+  },
+  "websiteUrl": "https://orrevua.dev",
+  "packages": [
+    {
+      "registryType": "pypi",
+      "identifier": "lobbyeasy-mcp",
+      "version": "0.1.0",
+      "transport": { "type": "stdio" },
+      "environmentVariables": [
+        { "name": "LOBBY_BACKEND", "description": "memory (demo data) or postgres", "isRequired": false },
+        { "name": "LOBBY_DATABASE_URL", "description": "Postgres/Supabase connection string", "isRequired": false, "isSecret": true },
+        { "name": "LOBBY_CONDOMINIUM_ID", "description": "condominios.id this server acts for", "isRequired": false },
+        { "name": "LOBBY_ROLE", "description": "viewer, porteiro or admin", "isRequired": false }
+      ]
+    }
+  ]
+}
