@@ -33,6 +33,7 @@ dev = [
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 testpaths = ["tests"]
+markers = ["postgres: also runs against a real Postgres (skipped when unreachable)"]
 
 [tool.ruff]
 line-length = 110
@@ -40,3 +41,4 @@ target-version = "py312"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B", "SIM", "RUF"]
+ignore = ["E501"]  # the formatter wraps code; long SQL/markdown literals stay readable
