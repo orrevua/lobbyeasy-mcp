@@ -11,21 +11,28 @@ from mcp.server.auth.settings import AuthSettings
 from mcp.server.mcpserver import MCPServer
 
 from lobbyeasy_mcp import __version__
+from lobbyeasy_mcp.actions import WriteService
 from lobbyeasy_mcp.config import Settings
 from lobbyeasy_mcp.data import make_repository
 from lobbyeasy_mcp.data.base import LobbyRepository
 from lobbyeasy_mcp.deps import Deps, PrincipalResolver
+from lobbyeasy_mcp.middleware import Gateway
+from lobbyeasy_mcp.notifier import Notifier, StubNotifier
 from lobbyeasy_mcp.principal import Principal, Role
 from lobbyeasy_mcp.prompts import register_prompts
 from lobbyeasy_mcp.resources import register_resources
+from lobbyeasy_mcp.safety import Safety, make_safety
 from lobbyeasy_mcp.service import LobbyService
 from lobbyeasy_mcp.tools.read import register_read_tools
+from lobbyeasy_mcp.tools.write import WRITE_TOOL_NAMES, register_write_tools
 
 INSTRUCTIONS = """\
 LobbyEasy: packages (encomendas) received by the lobby of ONE condominium.
 - Statuses: 'pendente' = waiting in the lobby, 'retirada' = picked up.
 - Find ids first: list_apartments for apartments, find_residents for people,
   search_packages for packages; then use get_* tools.
+- Write tools (if listed) only PROPOSE: show the returned summary to the user and call
+  confirm_action only after they explicitly agree.
 - Times are lobby-local. Resident phone/CPF are masked unless reveal_pii is granted.
 """
 
@@ -44,6 +51,8 @@ def build_server(
     clock: Callable[[], datetime] | None = None,
     token_verifier: TokenVerifier | None = None,
     auth: AuthSettings | None = None,
+    safety: Safety | None = None,
+    notifier: Notifier | None = None,
 ) -> MCPServer:
     settings = settings or Settings()
     repo = repo or make_repository(settings)
@@ -84,4 +93,11 @@ def build_server(
     register_read_tools(mcp, deps)
     register_resources(mcp, deps)
     register_prompts(mcp, deps)
+
+    safety = safety or make_safety(settings, repo)
+    if settings.enable_writes:
+        writes = WriteService(deps.service, safety, notifier or StubNotifier())
+        register_write_tools(mcp, deps, writes)
+    # Audit + rate limit + write gating for every tool call (see middleware.py).
+    mcp.middleware.append(Gateway(deps.resolve_principal, safety, WRITE_TOOL_NAMES))
     return mcp

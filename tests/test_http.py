@@ -95,3 +95,18 @@ async def test_rejects_missing_wrong_and_revoked_keys():
             r = await http.post(f"{base}/mcp", json=body, headers=headers)
             assert r.status_code == 401, headers
             assert "Bearer" in r.headers["www-authenticate"]
+
+
+async def test_write_flow_and_tool_visibility_over_http():
+    async with running_server(enable_writes=True) as base:
+        async with mcp_client(base, VIEWER_KEY) as viewer:
+            assert "confirm_action" not in {t.name for t in (await viewer.list_tools()).tools}
+        async with mcp_client(base, ATLANTICO_KEY) as doorman:
+            assert "confirm_action" in {t.name for t in (await doorman.list_tools()).tools}
+            proposal = await doorman.call_tool("mark_package_withdrawn", {"package_id": 19})
+            token = proposal.structured_content["result"]["confirmation_token"]
+            done = await doorman.call_tool("confirm_action", {"confirmation_token": token})
+            assert done.structured_content["result"]["status"] == "retirada"
+            # Jardim's package is invisible to the Atlântico key, even for writes.
+            other = await doorman.call_tool("mark_package_withdrawn", {"package_id": 2})
+            assert other.is_error and "not found" in other.content[0].text

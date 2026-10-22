@@ -17,3 +17,34 @@ CREATE TABLE IF NOT EXISTS mcp_api_keys (
     created_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
     revoked_at      TIMESTAMPTZ
 );
+
+-- Audit log: one row per tools/call, arguments redacted by the server (allowlist).
+-- No FK to condominios on purpose: audit rows must outlive what they describe.
+CREATE TABLE IF NOT EXISTS mcp_audit_log (
+    id              BIGSERIAL PRIMARY KEY,
+    at              TIMESTAMPTZ NOT NULL DEFAULT now(),
+    key_id          TEXT NOT NULL,
+    condominium_id  UUID,
+    role            TEXT,
+    tool            TEXT NOT NULL,
+    arguments       JSONB NOT NULL,
+    outcome         TEXT NOT NULL CHECK (outcome IN ('ok', 'error', 'denied', 'rate_limited')),
+    error           TEXT,
+    duration_ms     INT NOT NULL,
+    request_id      TEXT
+);
+CREATE INDEX IF NOT EXISTS idx_mcp_audit_condo_at ON mcp_audit_log (condominium_id, at DESC);
+CREATE INDEX IF NOT EXISTS idx_mcp_audit_key_at ON mcp_audit_log (key_id, at DESC);
+
+-- Idempotency keys for write actions: reserve (insert) -> complete (update) or release (delete).
+CREATE TABLE IF NOT EXISTS mcp_idempotency (
+    key_id           TEXT NOT NULL,
+    idempotency_key  TEXT NOT NULL,
+    tool             TEXT NOT NULL,
+    request_hash     CHAR(64) NOT NULL,
+    status           TEXT NOT NULL DEFAULT 'in_progress' CHECK (status IN ('in_progress', 'completed')),
+    result           JSONB,
+    created_at       TIMESTAMPTZ NOT NULL DEFAULT now(),
+    completed_at     TIMESTAMPTZ,
+    PRIMARY KEY (key_id, idempotency_key)
+);

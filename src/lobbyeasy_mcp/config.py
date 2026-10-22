@@ -50,3 +50,9 @@ class Settings(BaseSettings):
     @property
     def base_url(self) -> str:
         return (self.public_url or f"http://{self.host}:{self.port}").rstrip("/")
+
+    # Safety
+    enable_writes: bool = Field(default=False, description="Register write tools at all (still role-gated)")
+    confirmation_ttl_seconds: int = Field(default=300, description="How long a write proposal stays valid")
+    rate_limit_capacity: float = Field(default=30, description="Burst size per API key (token bucket)")
+    rate_limit_refill_per_second: float = Field(default=0.5, description="Sustained calls/second per key")

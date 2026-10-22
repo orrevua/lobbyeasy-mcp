@@ -4,7 +4,7 @@ A [Model Context Protocol](https://modelcontextprotocol.io) server for **LobbyEa
 lobby / package management app (Next.js + Supabase). It lets an AI assistant answer questions like
 "which packages are still waiting in the lobby?".
 
-> Milestone 3: remote streamable HTTP server with hashed API keys (condominium + role per key).
+> Milestone 4: role-gated, two-step write tools; rate limiting, audit log and idempotency keys.
 
 ## Run it
 
@@ -73,6 +73,15 @@ condominium id from the model. Deploy notes for Fly.io / Render: [docs/deploy.md
 
 Resources: `lobby://condominiums/{id}/summary` (JSON), `lobby://condominiums/{id}/pending` (markdown),
 `lobby://reference/package-lifecycle`. Prompts: `daily_lobby_report`, `stale_package_followup`.
+
+### Write tools (off by default)
+
+`LOBBY_ENABLE_WRITES=true` registers `register_package`, `mark_package_withdrawn`, `notify_resident`
+(stubbed notifier), `confirm_action` and `cancel_action`. They are hidden from and refused for roles
+without the `write` permission. Proposing tools return a summary plus a single-use `confirmation_token`;
+only `confirm_action` writes. Every tool call is rate limited per key (token bucket) and recorded in an
+audit log (`mcp_audit_log` on Postgres) with arguments redacted by allowlist. Writes accept an
+`idempotency_key` so a retry never registers the same package twice.
 
 ## Backends
 
