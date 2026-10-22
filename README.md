@@ -4,7 +4,7 @@ A [Model Context Protocol](https://modelcontextprotocol.io) server for **LobbyEa
 lobby / package management app (Next.js + Supabase). It lets an AI assistant answer questions like
 "which packages are still waiting in the lobby?".
 
-> Milestone 2: data access layer (Postgres + in-memory), 7 read tools, resources and prompts.
+> Milestone 3: remote streamable HTTP server with hashed API keys (condominium + role per key).
 
 ## Run it
 
@@ -46,6 +46,18 @@ claude mcp add lobbyeasy -- uv --directory /absolute/path/to/lobbyeasy-mcp run l
   }
 }
 ```
+
+## Remote server (streamable HTTP)
+
+```bash
+uv run lobbyeasy-mcp keys create --condominium 11111111-1111-4111-8111-111111111111 \
+    --role viewer --file api_keys.json          # prints the key once, stores its SHA-256
+LOBBY_API_KEYS_FILE=api_keys.json uv run lobbyeasy-mcp http --port 8000
+claude mcp add --transport http lobbyeasy http://127.0.0.1:8000/mcp --header "Authorization: Bearer lbe_..."
+```
+
+Each key is bound to one condominium and one role (`viewer`, `porteiro`, `admin`); tools never take a
+condominium id from the model. Deploy notes for Fly.io / Render: [docs/deploy.md](docs/deploy.md).
 
 ## Tools
 

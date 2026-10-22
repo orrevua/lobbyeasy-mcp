@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from enum import StrEnum
+from pathlib import Path
 from uuid import UUID
 
 from pydantic import Field
@@ -30,3 +31,22 @@ class Settings(BaseSettings):
     # trusts its environment: it acts as one fixed condominium + role, no API key needed.
     condominium_id: UUID = JARDIM_ID
     role: str = "viewer"
+
+    # Remote (streamable HTTP) server
+    host: str = "127.0.0.1"
+    port: int = 8000
+    public_url: str | None = Field(
+        default=None, description="External base URL, e.g. https://lobbyeasy-mcp.fly.dev (auth metadata)"
+    )
+    api_keys_file: Path | None = Field(default=None, description="JSON file of hashed API keys")
+    key_store: str = Field(
+        default="auto", description="'file', 'postgres' or 'auto' (file if set, else backend)"
+    )
+    stateless_http: bool = Field(
+        default=True, description="No server-side MCP sessions: any instance can serve any request"
+    )
+    json_response: bool = Field(default=True, description="Plain JSON responses instead of SSE streams")
+
+    @property
+    def base_url(self) -> str:
+        return (self.public_url or f"http://{self.host}:{self.port}").rstrip("/")

@@ -45,7 +45,7 @@ def reset_postgres() -> None:
     with psycopg.connect(PG_URL, autocommit=True) as conn:
         conn.execute(
             "DROP TABLE IF EXISTS withdrawal_sessions, encomendas, moradores, apartamentos, "
-            "invite_tokens, condominios CASCADE"
+            "invite_tokens, condominios, mcp_api_keys, mcp_audit_log, mcp_idempotency CASCADE"
         )
         for name in ("schema.sql", "mcp.sql", "seed.sql"):
             conn.execute((ROOT / "sql" / name).read_text())  # type: ignore[arg-type]

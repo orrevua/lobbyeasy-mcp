@@ -1,0 +1,34 @@
+# Fly.io: `fly launch --no-deploy --copy-config`, then set secrets and `fly deploy`.
+# See docs/deploy.md.
+app = "lobbyeasy-mcp"
+primary_region = "gru"  # São Paulo, close to the lobbies (and to Supabase sa-east-1)
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  LOBBY_HOST = "0.0.0.0"
+  LOBBY_PORT = "8080"
+  LOBBY_BACKEND = "postgres"
+  LOBBY_KEY_STORE = "postgres"
+  LOBBY_PUBLIC_URL = "https://lobbyeasy-mcp.fly.dev"
+  LOBBY_STATELESS_HTTP = "true"
+  # LOBBY_DATABASE_URL comes from `fly secrets set`, never from this file.
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = "stop"   # scale to zero when idle
+  auto_start_machines = true
+  min_machines_running = 0
+
+  [[http_service.checks]]
+    method = "GET"
+    path = "/healthz"
+    interval = "30s"
+    timeout = "5s"
+    grace_period = "10s"
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "256mb"

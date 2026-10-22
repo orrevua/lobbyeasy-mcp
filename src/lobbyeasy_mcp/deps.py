@@ -10,6 +10,7 @@ from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 from typing import Any, ParamSpec, TypeVar
 
+from mcp.server.context import ServerRequestContext
 from mcp.server.mcpserver import Context
 from mcp.server.mcpserver.exceptions import ResourceError, ResourceNotFoundError, ToolError
 from mcp.shared.exceptions import MCPError
@@ -23,7 +24,9 @@ from lobbyeasy_mcp.service import LobbyService
 
 log = logging.getLogger("lobbyeasy_mcp")
 
-PrincipalResolver = Callable[[Context], Principal]
+# Resolves the caller from the low-level request context, which tools, resources,
+# prompts *and* server middleware all have access to.
+PrincipalResolver = Callable[[ServerRequestContext[Any, Any]], Principal]
 
 
 @dataclass
@@ -34,7 +37,7 @@ class Deps:
     resolve_principal: PrincipalResolver
 
     def principal(self, ctx: Context) -> Principal:
-        return self.resolve_principal(ctx)
+        return self.resolve_principal(ctx.request_context)
 
 
 P = ParamSpec("P")

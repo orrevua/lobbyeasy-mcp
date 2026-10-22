@@ -1,0 +1,21 @@
+# Render Blueprint (free web service; sleeps after inactivity). See docs/deploy.md.
+services:
+  - type: web
+    name: lobbyeasy-mcp
+    runtime: docker
+    plan: free
+    region: oregon
+    healthCheckPath: /healthz
+    envVars:
+      - key: LOBBY_HOST
+        value: 0.0.0.0
+      - key: LOBBY_PORT
+        value: "8080"
+      - key: LOBBY_BACKEND
+        value: postgres
+      - key: LOBBY_KEY_STORE
+        value: postgres
+      - key: LOBBY_DATABASE_URL
+        sync: false   # set in the dashboard
+      - key: LOBBY_PUBLIC_URL
+        sync: false

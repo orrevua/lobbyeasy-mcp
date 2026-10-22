@@ -1,3 +1,3 @@
-from lobbyeasy_mcp.server import main
+from lobbyeasy_mcp.cli import main
 
 main()

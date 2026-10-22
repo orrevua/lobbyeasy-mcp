@@ -6,7 +6,9 @@ from collections.abc import AsyncIterator, Callable
 from contextlib import asynccontextmanager
 from datetime import datetime
 
-from mcp.server.mcpserver import Context, MCPServer
+from mcp.server.auth.provider import TokenVerifier
+from mcp.server.auth.settings import AuthSettings
+from mcp.server.mcpserver import MCPServer
 
 from lobbyeasy_mcp import __version__
 from lobbyeasy_mcp.config import Settings
@@ -40,6 +42,8 @@ def build_server(
     repo: LobbyRepository | None = None,
     resolve_principal: PrincipalResolver | None = None,
     clock: Callable[[], datetime] | None = None,
+    token_verifier: TokenVerifier | None = None,
+    auth: AuthSettings | None = None,
 ) -> MCPServer:
     settings = settings or Settings()
     repo = repo or make_repository(settings)
@@ -74,15 +78,10 @@ def build_server(
         instructions=INSTRUCTIONS,
         website_url="https://orrevua.dev",
         lifespan=lifespan,
+        token_verifier=token_verifier,
+        auth=auth,
     )
     register_read_tools(mcp, deps)
     register_resources(mcp, deps)
     register_prompts(mcp, deps)
     return mcp
-
-
-def main() -> None:
-    build_server().run("stdio")
-
-
-__all__ = ["Context", "build_server", "main"]
